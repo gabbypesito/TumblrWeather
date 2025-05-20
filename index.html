@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Weather by Tumblr</title>
+  <style>
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    input, button {
+      width: 80%;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #002f61;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #002f61;
+    }
+    .weather-info {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .weather-info p {
+      margin: 5px 0;
+    }
+    .tumblr-post {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .tumblr-post img {
+      width: 100%;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>The Weather by Tumblr</h1>
+    <input type="number" id="latitude" placeholder="Enter Latitude" step="any" required>
+    <input type="number" id="longitude" placeholder="Enter Longitude" step="any" required>
+    <button id="getWeatherBtn">Get Weather</button>
+    <div id="weatherInfo" class="weather-info"></div>
+    <div id="tumblrPost" class="tumblr-post"></div>
+  </div>
+
+  <script>
+    const weatherDescriptions = {
+      0: { description: 'Clear sky', tumblrPost: 'https://www.tumblr.com/nando161mando/734622716249915392?source=share' },
+      1: { description: 'Mainly clear', tumblrPost: '' },
+      2: { description: 'Partly cloudy', tumblrPost: 'https://www.tumblr.com/existennialmemes/755260196059807745/the-weather-tomorrow?source=share' },
+      3: { description: 'Overcast', tumblrPost: '' },
+      45: { description: 'Fog', tumblrPost: '' },
+      48: { description: 'Depositing rime fog', tumblrPost: '' },
+      51: { description: 'Light drizzle', tumblrPost: '' },
+      53: { description: 'Moderate drizzle', tumblrPost: '' },
+      55: { description: 'Dense drizzle', tumblrPost: '' },
+      56: { description: 'Light freezing drizzle', tumblrPost: '' },
+      57: { description: 'Dense freezing drizzle', tumblrPost: '' },
+      61: { description: 'Light rain', tumblrPost: 'https://www.tumblr.com/seabeck/783990518931718144/the-weather-is-supposed-to-be-so-lovely-this-next?source=share' },
+      63: { description: 'Moderate rain', tumblrPost: 'https://www.tumblr.com/2022dirt/762665556471103488/outlines-of-two-alligators-that-slept-through-the?source=share' },
+      65: { description: 'Heavy rain', tumblrPost: 'https://www.tumblr.com/lovelyardie/735985625495404544/maryland-is-a-real-place-btw?source=share' },
+      66: { description: 'Light freezing rain', tumblrPost: '' },
+      67: { description: 'Heavy freezing rain', tumblrPost: 'https://www.tumblr.com/toruandmidori/772241843364806656?source=share' },
+      71: { description: 'Light snow', tumblrPost: 'https://www.tumblr.com/heartwarminganimals/772860247663607808/ploop-ploop-ploop?source=share' },
+      73: { description: 'Moderate snow', tumblrPost: 'https://www.tumblr.com/catchymemes/770691190248062976?source=share' },
+      75: { description: 'Heavy snow', tumblrPost: 'https://www.tumblr.com/omelettebaby/621568669061988352/meirl?source=share' },
+      77: { description: 'Snow grains', tumblrPost: 'https://www.tumblr.com/pileofplushies/783935975907852288/its-freaking-cold?source=share' },
+      80: { description: 'Light showers of rain', tumblrPost: '' },
+      81: { description: 'Moderate showers of rain', tumblrPost: '' },
+      82: { description: 'Heavy showers of rain', tumblrPost: '' },
+      85: { description: 'Light showers of snow', tumblrPost: 'https://www.tumblr.com/dougielombax/783952776829059072/not-as-warm-today-for-now-at-least?source=share' },
+      86: { description: 'Heavy showers of snow', tumblrPost: '' },
+      95: { description: 'Thunderstorm', tumblrPost: '' },
+      96: { description: 'Thunderstorm with light hail', tumblrPost: '' },
+      99: { description: 'Thunderstorm with heavy hail', tumblrPost: '' }
+    };
+
+    document.getElementById('getWeatherBtn').addEventListener('click', function() {
+      const lat = parseFloat(document.getElementById('latitude').value);
+      const lon = parseFloat(document.getElementById('longitude').value);
+
+      if (isNaN(lat) || isNaN(lon)) {
+        alert('Please enter valid latitude and longitude values.');
+        return;
+      }
+
+      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`;
+
+      fetch(weatherUrl)
+        .then(response => response.json())
+        .then(data => {
+          const { temperature_2m, wind_speed_10m, weathercode } = data.current_weather;
+          const weatherDescription = weatherDescriptions[weathercode] || { description: 'Unknown weather condition', tumblrPost: '' };
+
+          document.getElementById('weatherInfo').innerHTML = `
+            <h2>Current Weather</h2>
+            <p><strong>Temperature:</strong> ${temperature_2m}°C</p>
+            <p><strong>Wind Speed:</strong> ${wind_speed_10m} m/s</p>
+            <p><strong>Condition:</strong> ${weatherDescription.description}</p>
+          `;
+
+          if (weatherDescription.tumblrPost) {
+            document.getElementById('tumblrPost').innerHTML = `
+              <p>Here's a Tumblr post related to the current weather:</p>
+              <a href="${weatherDescription.tumblrPost}" target="_blank">
+                <img src="${weatherDescription.tumblrPost}" alt="Tumblr Post">
+              </a>
+            `;
+          } else {
+            document.getElementById('tumblrPost').innerHTML = '<p>No related Tumblr post available.</p>';
+          }
+        })
+        .catch(error => {
+          document.getElementById('weatherInfo').innerHTML = '<p>Error fetching weather data. Please try again later.</p>';
+          console.error(error);
+        });
+    });
+  </script>
+
+</body>
+</html>
